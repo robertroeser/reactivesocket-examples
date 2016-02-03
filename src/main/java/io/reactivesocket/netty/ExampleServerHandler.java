@@ -75,14 +75,54 @@ public class ExampleServerHandler extends RequestHandler {
         }));
     }
 
-
-
     @Override
     public Publisher<Payload> handleSubscription(Payload payload) {
         return RxReactiveStreams.toPublisher(
+            Observable.defer(() -> {
+                int i = payload.getData().getInt(0);
 
+                if (i % 2 == 0) {
+                    System.out.println("Sending evenings...");
 
+                    return Observable
+                        .range(0, Integer.MAX_VALUE)
+                        .filter(f -> f % 2 == 0)
+                        .map(f -> new Payload() {
+                            @Override
+                            public ByteBuffer getData() {
+                                ByteBuffer data = ByteBuffer.allocate(BitUtil.SIZE_OF_INT);
+                                data.putInt(f);
+                                data.rewind();
+                                return data;
+                            }
 
+                            @Override
+                            public ByteBuffer getMetadata() {
+                                return Frame.NULL_BYTEBUFFER;
+                            }
+                        });
+                } else {
+                    System.out.println("Sending odds...");
+
+                    return Observable
+                        .range(0, Integer.MAX_VALUE)
+                        .filter(f -> f % 2 != 0)
+                        .map(f -> new Payload() {
+                            @Override
+                            public ByteBuffer getData() {
+                                ByteBuffer data = ByteBuffer.allocate(BitUtil.SIZE_OF_INT);
+                                data.putInt(f);
+                                data.rewind();
+                                return data;
+                            }
+
+                            @Override
+                            public ByteBuffer getMetadata() {
+                                return Frame.NULL_BYTEBUFFER;
+                            }
+                        });
+                }
+            })
             .doOnError(Throwable::printStackTrace)
         );
 
