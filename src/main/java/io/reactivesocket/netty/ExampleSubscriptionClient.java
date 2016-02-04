@@ -61,7 +61,7 @@ public class ExampleSubscriptionClient {
 
         CountDownLatch latch = new CountDownLatch(20);
 
-        Observable<Payload> payloadObservable = RxReactiveStreams.toObservable(reactiveSocket.requestStream(p));
+        Observable<Payload> payloadObservable = RxReactiveStreams.toObservable(reactiveSocket.requestSubscription(p));
         payloadObservable
             .map(response -> response.getData().getInt(0))
             .doOnNext(r ->
