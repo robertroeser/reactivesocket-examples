@@ -21,7 +21,7 @@ import java.util.concurrent.ThreadLocalRandom;
 /**
  * Created by rroeser on 2/3/16.
  */
-public class ExampleSubscriptionClient {
+public class ExampleSubscriptionFirehoseClient {
     public static void main(String... args) throws Exception {
 
         Observable<WebSocketConnection> wsConnection = HttpClient.newClient("localhost", 8888)
@@ -41,8 +41,7 @@ public class ExampleSubscriptionClient {
 
         reactiveSocket.startAndWait();
 
-        int i = ThreadLocalRandom.current().nextInt(5, 25);
-        System.out.println("asking for " + i + " ints");
+        int i = ThreadLocalRandom.current().nextInt(1, 100);
         ByteBuffer b = ByteBuffer.allocate(BitUtil.SIZE_OF_INT);
         b.putInt(i);
 
@@ -59,18 +58,16 @@ public class ExampleSubscriptionClient {
             }
         };
 
-        CountDownLatch latch = new CountDownLatch(20);
+        CountDownLatch latch = new CountDownLatch(200);
 
         Observable<Payload> payloadObservable = RxReactiveStreams.toObservable(reactiveSocket.requestSubscription(p));
         payloadObservable
             .map(response -> response.getData().getInt(0))
-            .doOnNext(r ->
-                System.out.println("Got from server => " + r))
             .doOnError(Throwable::printStackTrace)
            .subscribe(new Subscriber<Integer>() {
                @Override
                public void onStart() {
-                   request(1);
+                   request(Long.MAX_VALUE);
                }
 
                @Override
@@ -87,10 +84,8 @@ public class ExampleSubscriptionClient {
                public void onNext(Integer integer) {
                    latch.countDown();
                    System.out.println("Got => " + integer);
-                   request(1);
                }
            });
-
 
         latch.await();
     }

@@ -52,6 +52,7 @@ public class ExampleServerHandler extends RequestHandler {
 
                 return Observable
                     .range(0, numberOfNumber)
+                    //.onBackpressureDrop(i -> System.out.println("Dropping this number => " + i))
                     .doOnSubscribe(() -> System.out.println("Going to send back " + numberOfNumber + " numbers"))
                     .doOnError(Throwable::printStackTrace)
                     .map(i -> new Payload() {
@@ -166,6 +167,7 @@ public class ExampleServerHandler extends RequestHandler {
                         LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(sleep));
                         request(1);
                     } catch (Throwable t) {
+                        t.printStackTrace();
                         onError(t);
                     }
                 }
