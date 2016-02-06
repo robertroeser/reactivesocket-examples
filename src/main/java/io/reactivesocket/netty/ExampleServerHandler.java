@@ -145,7 +145,7 @@ public class ExampleServerHandler extends RequestHandler {
             .subscribe(new rx.Subscriber<Payload>() {
                 @Override
                 public void onStart() {
-                    request(1);
+                    request(2);
                 }
 
                 @Override
